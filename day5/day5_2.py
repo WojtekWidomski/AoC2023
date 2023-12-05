@@ -1,5 +1,9 @@
 from pprint import pprint
 
+# This works, but it is too slow. (this is python)
+# I started this program and I wrote the C++ version
+# and this still has not finished.
+
 FILENAME = "input.in"
 
 seeds = []
@@ -55,8 +59,11 @@ with open(FILENAME) as f:
 min_loc = -1
 
 for r in seeds:
-    print(r)
+    # print(r)
     for s in range(r[0], r[0]+r[1]):
+        # Show progress
+        # if s%100000 == 0:
+        #     print((s-r[0])/r[1])
         soil = get_from_map("seed-to-soil", s)
         fert = get_from_map("soil-to-fertilizer", soil)
         water = get_from_map("fertilizer-to-water", fert)
