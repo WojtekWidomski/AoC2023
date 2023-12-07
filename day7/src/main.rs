@@ -19,12 +19,8 @@ fn str_to_hand(hand_str: &str, cards_map: &HashMap<char, usize>) -> Vec<i32> {
 fn hand_type(hand: &Vec<i32>) -> i32 {
     let mut card_n: HashMap<i32, i32> = HashMap::new();
 
-    for c in hand {
-        if card_n.contains_key(c) {
-            card_n.insert(*c, card_n.get(c).unwrap() + 1);
-        } else {
-            card_n.insert(*c, 1);
-        }
+    for &c in hand {
+        *card_n.entry(c).or_insert(0) += 1;
     }
 
     match card_n.len() {

@@ -27,11 +27,7 @@ fn hand_type(hand: &Vec<i32>) -> i32 {
             j_number += 1;
             continue;
         }
-        if card_n.contains_key(c) {
-            card_n.insert(*c, card_n.get(c).unwrap() + 1);
-        } else {
-            card_n.insert(*c, 1);
-        }
+        *card_n.entry(*c).or_insert(0) += 1;
     }
 
     if j_number == 5 {
@@ -48,7 +44,7 @@ fn hand_type(hand: &Vec<i32>) -> i32 {
         }
     }
 
-    card_n.insert(max_card_type, card_n.get(&max_card_type).unwrap() + j_number);
+    *card_n.entry(max_card_type).or_insert(0) += j_number;
 
     match card_n.len() {
         1 => 7,
