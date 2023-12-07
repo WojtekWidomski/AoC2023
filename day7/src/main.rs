@@ -42,7 +42,6 @@ fn hand_type(hand: &Vec<i32>) -> i32 {
             match max_n {
                 3 => 4,
                 2 => 3,
-                // _ => {dbg!(&card_n); return 0;},
                 _ => 0
             }
         }
@@ -88,18 +87,11 @@ fn main() {
         })
         .collect();
 
-    // hands.iter().for_each(|x| {
-    //     let t = hand_type(&x.0);
-    //     dbg!(x, t);
-    // });
-
     hands.sort_by(|a, b| compare_hands(&a.0, &b.0));
-    // hands.reverse();
 
     let mut res_sum = 0;
 
     for i in 1..(hands.len()+1) {
-        // dbg!(&hands[i-1], i);
         res_sum += hands[i-1].1*(i as i32);
     }
 
