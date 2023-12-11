@@ -1,12 +1,11 @@
-use std::{fs, mem::swap};
+use std::fs;
 
 use anyhow::{Ok, Result};
 
-const FILENAME: &str = "test1.in";
-const EMPTY_SIZE: i32 = 10; // for test input
+const FILENAME: &str = "input";
+const EMPTY_SIZE: i32 = 1000000;
 
-// const EMPTY_SIZE: i32 = 1000000;
-
+// Count empty lines
 fn expand(
     image: &mut Vec<Vec<char>>,
     empty_col_prefsum: &mut Vec<i32>,
@@ -48,30 +47,26 @@ fn expand(
     }
 }
 
+// Get number of empty lines in interval
 fn get_from_prefsum(start: usize, end: usize, prefsum: &Vec<i32>) -> i32 {
-    let mut start = start;
-    let mut end = end;
-    if start > end {
-        swap(&mut start,&mut end);
-    }
     if start == 0 {
         return prefsum[end];
     }
-    prefsum[end] - prefsum[start-1]
+    prefsum[end] - prefsum[start - 1]
 }
 
 fn path_sum(
     image: &Vec<Vec<char>>,
     empty_col_prefsum: &Vec<i32>,
     empty_row_prefsum: &Vec<i32>,
-) -> i32 {
+) -> i128 {
     let mut galaxies = Vec::new();
     let mut result = 0;
 
     for i in 0..image.len() {
         for j in 0..image[0].len() {
             if image[i][j] == '#' {
-                galaxies.push((i as i32, j as i32));
+                galaxies.push((i, j));
             }
         }
     }
@@ -80,10 +75,12 @@ fn path_sum(
         for j in i + 1..galaxies.len() {
             let g1 = galaxies[i];
             let g2 = galaxies[j];
-            let dist_x = (g1.0 - g2.0).abs()
-                + get_from_prefsum(g2.0 as usize, g1.0 as usize, empty_col_prefsum) * EMPTY_SIZE;
-            let dist_y = (g1.1 - g2.1).abs()
-                + get_from_prefsum(g2.1 as usize, g1.1 as usize, empty_row_prefsum) * EMPTY_SIZE;
+            let dist_x = (g1.0 as i128 - g2.0 as i128).abs()
+                + get_from_prefsum(g2.0.min(g1.0), g1.0.max(g2.0), empty_row_prefsum) as i128
+                    * (EMPTY_SIZE as i128 - 1);
+            let dist_y = (g1.1 as i128 - g2.1 as i128).abs()
+                + get_from_prefsum(g2.1.min(g1.1), g1.1.max(g2.1), empty_col_prefsum) as i128
+                    * (EMPTY_SIZE as i128 - 1);
             result += dist_x + dist_y;
         }
     }
@@ -98,11 +95,17 @@ fn main() -> Result<()> {
         .map(|l| l.chars().collect::<Vec<char>>())
         .collect();
 
+    // Empty columns and rows prefix sums
+    // e.g. empty_col_prefsum[8] == 3 means that there are 3 empty columns
+    // between column 0 and 8.
     let mut empty_col_prefsum: Vec<i32> = Vec::new();
     let mut empty_row_prefsum: Vec<i32> = Vec::new();
-    expand(&mut space_image, &mut empty_col_prefsum, &mut empty_row_prefsum);
 
-    dbg!(&empty_col_prefsum, &empty_row_prefsum);
+    expand(
+        &mut space_image,
+        &mut empty_col_prefsum,
+        &mut empty_row_prefsum,
+    );
 
     let length_sum = path_sum(&space_image, &empty_col_prefsum, &empty_row_prefsum);
 
