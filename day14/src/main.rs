@@ -3,9 +3,17 @@ use std::fs;
 
 const FILENAME: &str = "test1.in";
 
-fn move_up(platform: &mut Vec<Vec<char>>) {
+enum TiltDirection {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+fn tilt_platform(platform: &mut Vec<Vec<char>>, direction: TiltDirection) {
     for j in 0..platform[0].len() {
         let mut n = 0;
+        
         for i in (0..platform.len()).rev() {
             match platform[i][j] {
                 'O' => {
@@ -43,7 +51,7 @@ fn main() -> Result<()> {
         .map(|l| l.chars().collect::<Vec<char>>())
         .collect();
 
-    move_up(&mut platform);
+    tilt_platform(&mut platform, TiltDirection::Up);
 
     let mut sum = 0;
 
