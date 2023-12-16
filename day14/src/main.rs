@@ -119,6 +119,7 @@ fn tilt_cycle(platform: &mut Vec<Vec<char>>) {
     tilt_platform(platform, TiltDirection::Right);
 }
 
+#[allow(dead_code)]
 fn print_platform(platform: &Vec<Vec<char>>) {
     for l in platform {
         for c in l {
