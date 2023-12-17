@@ -1,4 +1,4 @@
-use std::{collections::BinaryHeap, fs};
+use std::{collections::BinaryHeap, fs, vec};
 
 use anyhow::Result;
 
@@ -36,17 +36,7 @@ impl PartialEq for DijkstraTile {
     }
 }
 
-fn print_arr(arr: &Vec<Vec<i32>>) {
-    for l in arr {
-        for i in l {
-            print!("{} ", i);
-        }
-        println!("");
-    }
-    println!("");
-}
-
-fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
+fn dijkstra(graph: &Vec<Vec<u32>>, min_move: usize, max_move: usize) -> i32 {
     let mut dist_hor = vec![vec![i32::MAX; graph[0].len()]; graph.len()];
     let mut dist_ver = vec![vec![i32::MAX; graph[0].len()]; graph.len()];
 
@@ -70,10 +60,6 @@ fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
     while !q.is_empty() {
         let tile = q.pop().unwrap();
 
-        // dbg!(&tile);
-
-        // dbg!(dist_hor[tile.y][tile.x], dist_ver[tile.y][tile.x]);
-
         if (tile.dir == Direction::Horizontal && tile.dist != dist_hor[tile.y][tile.x])
             || (tile.dir == Direction::Vertical && tile.dist != dist_ver[tile.y][tile.x])
         {
@@ -85,7 +71,10 @@ fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
         match tile.dir {
             Direction::Horizontal => {
                 let mut dist = 0;
-                for i in (tile.y + 1)..(tile.y + 4).min(graph.len()) {
+                for i in (tile.y + 1)..(tile.y + min_move).min(graph.len()) {
+                    dist += graph[i][tile.x];
+                }
+                for i in (tile.y + min_move)..(tile.y + max_move + 1).min(graph.len()) {
                     dist += graph[i][tile.x];
                     adj_tiles.push(DijkstraTile {
                         dist: dist as i32,
@@ -95,7 +84,13 @@ fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
                     });
                 }
                 dist = 0;
-                for i in ((tile.y as i32 - 4).max(0)..(tile.y as i32)).rev() {
+                for i in ((tile.y as i32 - min_move as i32 + 1).max(0)..(tile.y as i32)).rev() {
+                    dist += graph[i as usize][tile.x];
+                }
+                for i in ((tile.y as i32 - max_move as i32).max(0)
+                    ..(tile.y as i32 - min_move as i32 + 1))
+                    .rev()
+                {
                     dist += graph[i as usize][tile.x];
                     adj_tiles.push(DijkstraTile {
                         dist: dist as i32,
@@ -107,7 +102,10 @@ fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
             }
             Direction::Vertical => {
                 let mut dist = 0;
-                for i in (tile.x + 1)..(tile.x + 4).min(graph[0].len()) {
+                for i in (tile.x + 1)..(tile.x + min_move).min(graph[0].len()) {
+                    dist += graph[tile.y][i];
+                }
+                for i in (tile.x + min_move)..(tile.x + max_move + 1).min(graph[0].len()) {
                     dist += graph[tile.y][i];
                     adj_tiles.push(DijkstraTile {
                         dist: dist as i32,
@@ -117,7 +115,13 @@ fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
                     });
                 }
                 dist = 0;
-                for i in ((tile.x as i32 - 4).max(0)..(tile.x as i32)).rev() {
+                for i in ((tile.x as i32 - min_move as i32 + 1).max(0)..(tile.x as i32)).rev() {
+                    dist += graph[tile.y][i as usize];
+                }
+                for i in ((tile.x as i32 - max_move as i32).max(0)
+                    ..(tile.x as i32 - min_move as i32 + 1).max(0))
+                    .rev()
+                {
                     dist += graph[tile.y][i as usize];
                     adj_tiles.push(DijkstraTile {
                         dist: dist as i32,
@@ -129,16 +133,11 @@ fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
             }
         }
 
-        // dbg!(&adj_tiles);
-
         for t in adj_tiles {
             let (dist_ref, dist_ref2) = match tile.dir {
                 Direction::Horizontal => (&mut dist_ver, &mut dist_hor),
                 Direction::Vertical => (&mut dist_hor, &mut dist_ver),
             };
-
-
-            // dbg!(dist_ref[tile.y][tile.x], dist_ref2[tile.y][tile.x], t.dist);
 
             if dist_ref2[tile.y][tile.x] + t.dist < dist_ref[t.y][t.x] {
                 dist_ref[t.y][t.x] = dist_ref2[tile.y][tile.x] + t.dist;
@@ -151,11 +150,6 @@ fn dijkstra(graph: &Vec<Vec<u32>>) -> i32 {
             }
         }
     }
-
-    // dbg!(&dist_hor, &dist_ver);
-
-    // print_arr(&dist_hor);
-    // print_arr(&dist_ver);
 
     *dist_hor
         .last()
@@ -171,9 +165,11 @@ fn main() -> Result<()> {
         .map(|l| l.chars().map(|c| c.to_digit(10).unwrap()).collect())
         .collect();
 
-    let dist = dijkstra(&map_graph);
+    let part1_dist = dijkstra(&map_graph, 1, 3);
+    let part2_dist = dijkstra(&map_graph, 4, 10);
 
-    println!("{}", dist);
+    println!("Part 1: {}", part1_dist);
+    println!("Part 2: {}", part2_dist);
 
     Ok(())
 }
