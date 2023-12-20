@@ -74,7 +74,7 @@ fn main() -> Result<()> {
             accepted_sum += x + m + a + s;
         }
     }
-    
+
     println!("{}", accepted_sum);
 
     Ok(())
