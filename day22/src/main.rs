@@ -4,7 +4,7 @@ use anyhow::Result;
 
 const FILENAME: &str = "input";
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 struct Brick {
     x1: i32,
     y1: i32,
@@ -50,9 +50,11 @@ impl Brick {
     }
 }
 
-// Simulate falling of bricks
-fn fall(bricks: &mut Vec<Brick>) {
-    // bricks must be sorted
+// Simulate falling of bricks and return number of bricks, that changed thier position.
+// bricks must be sorted.
+fn fall(bricks: &mut Vec<Brick>) -> i32 {
+    let mut falling_number = 0;
+
     for i in 0..bricks.len() {
         let mut new_min_z = 0; // New down z of brick
         let old_min_z = bricks[i].z1.min(bricks[i].z2); // Old down z of brick
@@ -64,9 +66,15 @@ fn fall(bricks: &mut Vec<Brick>) {
         }
         new_min_z += 1;
 
+        if new_min_z != old_min_z {
+            falling_number += 1;
+        }
+
         bricks[i].z1 -= old_min_z - new_min_z;
         bricks[i].z2 -= old_min_z - new_min_z;
     }
+
+    falling_number
 }
 
 fn safe_to_remove_number(bricks: &Vec<Brick>) -> i32 {
@@ -113,11 +121,25 @@ fn main() -> Result<()> {
 
     bricks.sort();
 
+    // Part 1
     fall(&mut bricks);
 
     let safe = safe_to_remove_number(&bricks);
 
-    println!("{}", safe);
+    println!("Part 1: {}", safe);
+
+    // Part 2
+    let mut falling_sum = 0;
+
+    // It is probably possible to do it much faster (this is O(n^3)),
+    // but there are only 1485 bricks in input.
+    for i in 0..bricks.len() {
+        let mut bricks_without_i = bricks.clone();
+        bricks_without_i.remove(i);
+        falling_sum += fall(&mut bricks_without_i);
+    }
+
+    println!("Part 2: {}", falling_sum);
 
     Ok(())
 }
