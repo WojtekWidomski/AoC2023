@@ -1,4 +1,4 @@
-use std::{fs, collections::BTreeSet};
+use std::{cmp::Ordering, collections::BTreeSet, fs};
 
 use anyhow::Result;
 
@@ -22,6 +22,11 @@ struct Point {
 impl Ord for Point {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         if self.y == other.y {
+            if (self.c_type == CornerType::UL || self.c_type == CornerType::UR)
+                && (other.c_type == CornerType::DL || other.c_type == CornerType::DR)
+            {
+                return Ordering::Less;
+            }
             return self.x.cmp(&other.x);
         }
         self.y.cmp(&other.y)
@@ -127,6 +132,8 @@ fn main() -> Result<()> {
     }
 
     corners.sort();
+
+    dbg!(&corners);
 
     let mut last_y = corners.first().unwrap().y;
 
