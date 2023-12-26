@@ -6,7 +6,7 @@ const FILENAME: &str = "input";
 // This is type of tile in a loop
 #[derive(Clone)]
 enum LoopTile {
-    Vertical, // It is possible to go down (|, J, 7)
+    Vertical, // It is possible to go down (|, F, 7)
     NotVertical, // It is not possible to go down
     None, // This tile is not part of the loop
 }
